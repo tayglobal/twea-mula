@@ -1,0 +1,42 @@
+Metadata-Version: 2.1
+Name: kydb
+Version: 0.6.1
+Summary: kydb (Kinyu Database). NoSQL DB interface.
+Home-page: https://github.com/tayglobal/kydb
+Author: Tony Yum
+Author-email: tony.yum@tayglobal.com
+License: MIT
+Keywords: NoSQL,Database,DB
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Build Tools
+Classifier: License :: OSI Approved :: MIT License
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: boto3
+Requires-Dist: redis
+
+# Introduction
+
+An abstraction layer for NoSQL Database with features used in the financial services industry.
+
+ * Simple factory. A single URL would define the database or union.
+ 
+ * Filesystem-like heirachy for objects.
+ 
+ * Caching and cache context.
+ 
+ * Union: i.e. multiple databases where:
+ 
+   * Read would look for the object in order
+   
+   * Write always writes to the first (front) db
+   
+ * Serialisable objects. Any python object can be stored in the DB with
+ 
+   * With option to use decorators to give finer control over serialisation.
+
+
+See [Documentation](https://kydb.readthedocs.io/en/latest/).
+
