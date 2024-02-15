@@ -17,7 +17,7 @@ def _get_resource_id(rest_api_id, path):
 
 
 def create_resource(rest_api_id):
-    root_id = _get_resource_id(rest_api_id, '/')
+    root_id = _get_resource_id(rest_api_id, "/")
 
     response = client.create_resource(
         restApiId=rest_api_id,
@@ -38,14 +38,14 @@ def create_method(rest_api_id, resource_id):
 
     print(response)
 
+
 def get_role_arn():
-    iam = boto3.client('iam')
+    iam = boto3.client("iam")
 
-    response = iam.get_role(
-        RoleName=ROLE_NAME
-    )
+    response = iam.get_role(RoleName=ROLE_NAME)
 
-    return response['Role']['Arn']
+    return response["Role"]["Arn"]
+
 
 def create_integration(stage, rest_api_id, resource_id):
     lambda_uri = get_lambda_function_uri(LAMBDA_FUNCTION_MAP[stage])
@@ -54,30 +54,31 @@ def create_integration(stage, rest_api_id, resource_id):
 
     credentials = get_role_arn()
 
-    # response = client.put_integration(
+    response = client.put_integration(
+        restApiId=rest_api_id,
+        resourceId=resource_id,
+        httpMethod="POST",
+        type="AWS_PROXY",
+        integrationHttpMethod="POST",
+        uri=uri,
+        credentials=credentials,
+    )
+
+    # response = client.update_integration(
     #     restApiId=rest_api_id,
     #     resourceId=resource_id,
     #     httpMethod='POST',
-    #     type='AWS_PROXY',
-    #     integrationHttpMethod='POST',
-    #     uri=uri,
-    #     credentials=credentials
+    #     patchOperations=[
+    #         {
+    #             'op': 'replace',
+    #             'path': '/uri',
+    #             'value': uri,
+    #         },
+    #     ]
     # )
 
-    response = client.update_integration(
-        restApiId=rest_api_id,
-        resourceId=resource_id,
-        httpMethod='POST',
-        patchOperations=[
-            {
-                'op': 'replace',
-                'path': '/uri',
-                'value': uri,
-            },
-        ]
-    )
-
     print(response)
+
 
 def get_lambda_function_uri(function_name):
     client = boto3.client("lambda", region_name=AWS_REGION)
@@ -91,7 +92,7 @@ def create_deploy(rest_api_id, stage):
         stageName=stage,  # replace with your stage name
         description=f"{stage} stage",
     )
-    
+
     print(response)
 
 
@@ -109,12 +110,24 @@ def create_api_gateway(stage):
     print(response)
 
 
-def create_all(stage):
-    # create_api_gateway(stage)
-    rest_api_id = get_rest_api_id(stage)
-    # create_resource(rest_api_id)
+def get_deployed_url(stage, rest_api_id):
+    # client = boto3.client("apigateway")
 
-    resource_id = _get_resource_id(rest_api_id, '/interactions')
-    # create_method(rest_api_id, resource_id)
+    # response = client.get_stage(restApiId=rest_api_id, stageName=stage)
+    # print(response)
+    url = f"https://{rest_api_id}.execute-api.{AWS_REGION}.amazonaws.com/{stage}"
+    return url
+
+
+def create_all(stage):
+    create_api_gateway(stage)
+    rest_api_id = get_rest_api_id(stage)
+    create_resource(rest_api_id)
+
+    interactions = "/interactions"
+    resource_id = _get_resource_id(rest_api_id, interactions)
+    create_method(rest_api_id, resource_id)
     create_integration(stage, rest_api_id, resource_id)
-    # create_deploy(rest_api_id, stage)
+    create_deploy(rest_api_id, stage)
+    url = get_deployed_url(stage, rest_api_id) + interactions
+    print(f"Interactions URL is: {url}")

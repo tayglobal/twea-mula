@@ -5,8 +5,10 @@ from settings import POLICY_NAME, ROLE_NAME, AWS_ACCOUNT, AWS_REGION, LAMBDA_FUN
 
 iam = boto3.client('iam')
 
-def create_policy(stage: str):
-    lambda_name = LAMBDA_FUNCTION_MAP[stage]
+def create_policy():
+    lambda_dev = LAMBDA_FUNCTION_MAP['dev']
+    lambda_prod = LAMBDA_FUNCTION_MAP['prod']
+
     policy_document = {
         "Version": "2012-10-17",
         "Statement": [
@@ -39,7 +41,10 @@ def create_policy(stage: str):
             {
                 "Effect": "Allow",
                 "Action": "lambda:InvokeFunction",
-                "Resource": f"arn:aws:lambda:{AWS_REGION}:{AWS_ACCOUNT}:function:{lambda_name}"
+                "Resource": [
+                    f"arn:aws:lambda:{AWS_REGION}:{AWS_ACCOUNT}:function:{lambda_dev}",
+                    f"arn:aws:lambda:{AWS_REGION}:{AWS_ACCOUNT}:function:{lambda_prod}"
+                ]
             },
             {
                 "Effect": "Allow",
