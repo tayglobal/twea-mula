@@ -23,10 +23,6 @@ logger = logging.getLogger(__name__)
 _SKIP_AUTH = False
 _SKIP_MESSAGE = False
 
-logger.debug("debug")
-logger.info("info")
-logger.warn("warning")
-
 logger.info("getting discord token")
 DISCORD_TOKEN = get_secret("DISCORD_TOKEN")
 
